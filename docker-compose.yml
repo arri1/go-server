@@ -11,7 +11,7 @@ services:
       POSTGRES_DB: go_server
     ports:
       # Проброс на хост, чтобы можно было ходить в БД с машины (DBeaver, psql).
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       # SQL из migrations/ выполнится только при первой инициализации тома.

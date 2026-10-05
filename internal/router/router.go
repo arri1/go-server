@@ -6,11 +6,8 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
+	"go-server/docs"
 	"go-server/internal/handler"
-
-	// Пакет docs создаёт swag командой `swag init`.
-	// Импорт с подчёркиванием регистрирует спецификацию при старте.
-	_ "go-server/docs"
 )
 
 // New создаёт движок Gin и навешивает маршруты.
@@ -32,8 +29,18 @@ func New(posts *handler.PostHandler) *gin.Engine {
 		v1.DELETE("/posts/:id", posts.DeletePost)
 	}
 
-	// UI Swagger: http://localhost:8080/swagger/index.html
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// Host в сгенерированных docs зашит как localhost:8080.
+	// Подменяем на Host текущего запроса: локально останется localhost,
+	// на VPS Try it out пойдёт на 185.233.185.109:8080, а не на машину клиента.
+	r.GET("/swagger/*any", func(c *gin.Context) {
+		docs.SwaggerInfo.Host = c.Request.Host
+		if c.Request.TLS != nil {
+			docs.SwaggerInfo.Schemes = []string{"https"}
+		} else {
+			docs.SwaggerInfo.Schemes = []string{"http"}
+		}
+		ginSwagger.WrapHandler(swaggerFiles.Handler)(c)
+	})
 
 	return r
 }
