@@ -1,0 +1,10 @@
+.git
+.gitignore
+.bin
+.env
+README.md
+Makefile
+**/*_test.go
+.DS_Store
+.idea
+.vscode

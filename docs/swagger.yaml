@@ -1,0 +1,223 @@
+basePath: /
+definitions:
+  handler.HealthResponse:
+    properties:
+      status:
+        example: ok
+        type: string
+    type: object
+  models.CreatePostRequest:
+    properties:
+      content:
+        example: Текст поста
+        type: string
+      title:
+        description: 'binding:"required" — тег Gin: поле обязательно, иначе 400.'
+        example: Привет, Go
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  models.ErrorResponse:
+    properties:
+      error:
+        example: пост не найден
+        type: string
+    type: object
+  models.Post:
+    properties:
+      content:
+        example: Текст поста
+        type: string
+      created_at:
+        example: "2026-10-05T11:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      title:
+        example: Привет, Go
+        type: string
+      updated_at:
+        example: "2026-10-05T11:00:00Z"
+        type: string
+    type: object
+  models.UpdatePostRequest:
+    properties:
+      content:
+        example: Обновлённый текст
+        type: string
+      title:
+        example: Обновлённый заголовок
+        type: string
+    required:
+    - content
+    - title
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: 'Учебный REST API: CRUD постов, Postgres и Swagger.'
+  title: Go Server API
+  version: "1.0"
+paths:
+  /api/v1/posts:
+    get:
+      description: Возвращает все посты, новые сверху
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Post'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Список постов
+      tags:
+      - posts
+    post:
+      consumes:
+      - application/json
+      description: Создаёт новый пост
+      parameters:
+      - description: Данные поста
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Создать пост
+      tags:
+      - posts
+  /api/v1/posts/{id}:
+    delete:
+      description: Удаляет пост по id
+      parameters:
+      - description: ID поста
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Пост удалён
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Удалить пост
+      tags:
+      - posts
+    get:
+      description: Возвращает один пост по id
+      parameters:
+      - description: ID поста
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Получить пост
+      tags:
+      - posts
+    put:
+      consumes:
+      - application/json
+      description: Полностью заменяет title и content
+      parameters:
+      - description: ID поста
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новые данные
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Обновить пост
+      tags:
+      - posts
+  /health:
+    get:
+      description: Используется Docker healthcheck и балансировщиками
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.HealthResponse'
+      summary: Проверка живости
+      tags:
+      - system
+swagger: "2.0"
